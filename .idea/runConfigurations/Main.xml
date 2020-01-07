@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Main" type="Java Scratch" factoryName="Java Scratch" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="Main" />
+    <module name="Snake" />
+    <option name="SCRATCH_FILE_URL" value="file://$PROJECT_DIR$/src/Main.java" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
