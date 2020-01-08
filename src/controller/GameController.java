@@ -7,7 +7,7 @@ import view.StartFrame;
 public class GameController {
 
     private StartFrame start;
-    private SnakeFrame snake;
+    private SnakeController game;
 
     public GameController() {
         start = new StartFrame(this);
@@ -15,11 +15,11 @@ public class GameController {
 
     public void startGame() {
         start.dispose();
-        snake = new SnakeFrame(this);
+        game = new SnakeController(this);
     }
 
-    public void restartGame(int score) {
-        snake = null;
+    void restartGame(int score) {
+        game = null;
         new RestartFrame(this, score);
     }
 }
