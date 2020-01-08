@@ -7,13 +7,14 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class StartFrame extends JFrame implements KeyListener {
+public class RestartFrame extends JFrame implements KeyListener {
+
     private GameController gameController;
 
-    public StartFrame(GameController gameController) {
+    public RestartFrame(GameController gameController, int score) {
         this.gameController = gameController;
-        JLabel label = new JLabel("Controls: \n Arrow Keys or W, A, S, D");
-        JButton button = new JButton("Start Game");
+        JLabel label = new JLabel("Game Over! \n Your score is: " + score);
+        JButton button = new JButton("Restart Game");
         button.addActionListener(e -> gameController.startGame());
         setTitle("Start Game");
         button.addKeyListener(this);
@@ -29,13 +30,12 @@ public class StartFrame extends JFrame implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_S)
-            gameController.startGame();
     }
 
     @Override
-    public void keyTyped(KeyEvent keyEvent) {
-
+    public void keyTyped(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_R)
+            gameController.startGame();
     }
 
     @Override

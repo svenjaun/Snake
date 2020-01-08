@@ -1,11 +1,13 @@
 package controller;
 
+import view.RestartFrame;
 import view.SnakeFrame;
 import view.StartFrame;
 
 public class GameController {
 
-    StartFrame start;
+    private StartFrame start;
+    private SnakeFrame snake;
 
     public GameController() {
         start = new StartFrame(this);
@@ -13,6 +15,11 @@ public class GameController {
 
     public void startGame() {
         start.dispose();
-        new SnakeFrame();
+        snake = new SnakeFrame(this);
+    }
+
+    public void restartGame(int score) {
+        snake = null;
+        new RestartFrame(this, score);
     }
 }

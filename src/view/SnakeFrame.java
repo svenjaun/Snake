@@ -1,42 +1,36 @@
 package view;
 
 
+import controller.GameController;
 import model.Direction;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.security.KeyStore;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
 
 public class SnakeFrame extends JFrame implements KeyListener, Runnable {
 
-    Container content;
-
     private static int size = 41;
+    private JPanel[][] grid = new JPanel[size][size];
+    private Random rnd = new Random();
+    private Point fruit = new Point(1, 1);
+    private ArrayList<Point> snake = new ArrayList<>();
+    private boolean hasToResize = false;
+    private Queue<Direction> directionQueue = new LinkedList<>();
+    private GameController gameController;
 
-    JPanel[][] grid = new JPanel[size][size];
-
-    Random rnd = new Random();
-
-    Point fruit = new Point(1, 1);
-
-    ArrayList<Point> snake = new ArrayList<>();
-
-    Thread game = new Thread(this);
-
-    boolean hasToResize = false;
-
-    Direction currentDirection = Direction.EAST;
-
-    int score = 0;
+    private int score = 0;
 
 
-    public SnakeFrame() {
+    public SnakeFrame(GameController gameController) {
         super("Snake");
-        content = getContentPane();
+        this.gameController = gameController;
+        Container content = getContentPane();
         content.setLayout(new GridLayout(size, size));
 
         for (int i = 0; i < size; i++) {
@@ -48,13 +42,17 @@ public class SnakeFrame extends JFrame implements KeyListener, Runnable {
         }
         grid[size / 2][size / 2].setBackground(Color.green);
         snake.add(new Point(size / 2, size / 2));
-        setSize(1000, 1000);
+
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        setSize(screenSize.height / 8 * 7, screenSize.height / 5 * 4);
         setResizable(false);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
         addKeyListener(this);
         setFruit();
+        Thread game = new Thread(this);
         game.start();
     }
 
@@ -67,8 +65,8 @@ public class SnakeFrame extends JFrame implements KeyListener, Runnable {
             x = rnd.nextInt(size - 3);
             y = rnd.nextInt(size - 3);
 
-            for (int i = 0; i < snake.size(); i++) {
-                if (x == snake.get(i).getX() && y == snake.get(i).getY()) {
+            for (Point point : snake) {
+                if (x == point.getX() && y == point.getY()) {
                     isBumpingToSnake = true;
                 }
             }
@@ -80,9 +78,7 @@ public class SnakeFrame extends JFrame implements KeyListener, Runnable {
     }
 
     private void gameOver() {
-        game.interrupt();
-        JOptionPane.showMessageDialog(this, "Game Over\nYour Score is: " + score);
-        System.exit(0);
+        gameController.restartGame(score);
     }
 
     @Override
@@ -90,7 +86,16 @@ public class SnakeFrame extends JFrame implements KeyListener, Runnable {
         while (true) {
             int x = 0;
             int y = 0;
-            switch (currentDirection) {
+
+            if (directionQueue.size() == 2) {
+                Direction[] a = directionQueue.toArray(new Direction[2]);
+                if (a[0].equals(a[1])) {
+                    directionQueue.remove();
+                }
+            }
+
+            Direction removedDirection = (directionQueue.size() != 0) ? directionQueue.remove() : Direction.EAST;
+            switch (removedDirection) {
                 case EAST:
                     y += 1;
                     break;
@@ -104,6 +109,10 @@ public class SnakeFrame extends JFrame implements KeyListener, Runnable {
                     x += 1;
                     break;
             }
+            if (directionQueue.size() == 0) {
+                directionQueue.add(removedDirection);
+            }
+
 
             for (int i = 1; i < snake.size(); i++) {
                 if (snake.get(0).getX() + x == snake.get(i).getX() && snake.get(0).getY() + y == snake.get(i).getY()) {
@@ -120,7 +129,7 @@ public class SnakeFrame extends JFrame implements KeyListener, Runnable {
                 grid[(int) (snake.get(snake.size() - 1).getX())][(int) (snake.get(snake.size() - 1).getY())].setBackground(Color.BLACK);
                 moveSnake();
             } else {
-                Point point = new Point((int)(snake.get(snake.size() - 1).getX()), (int) (snake.get(snake.size() - 1).getY()));
+                Point point = new Point((int) (snake.get(snake.size() - 1).getX()), (int) (snake.get(snake.size() - 1).getY()));
                 moveSnake();
                 snake.add(point);
                 grid[(int) (snake.get(snake.size() - 1).getX())][(int) (snake.get(snake.size() - 1).getY())].setBackground(Color.green);
@@ -160,14 +169,16 @@ public class SnakeFrame extends JFrame implements KeyListener, Runnable {
 
     @Override
     public void keyPressed(KeyEvent e) {
+        if (directionQueue.size() > 2) return;
         if (e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D)
-            currentDirection = Direction.EAST;
+            directionQueue.add(Direction.EAST);
         else if (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A)
-            currentDirection = Direction.WEST;
+            directionQueue.add(Direction.WEST);
         else if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S)
-            currentDirection = Direction.SOUTH;
+            directionQueue.add(Direction.SOUTH);
         else if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W)
-            currentDirection = Direction.NORTH;
+            directionQueue.add(Direction.NORTH);
+
     }
 
     @Override
